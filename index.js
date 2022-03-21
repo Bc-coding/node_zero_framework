@@ -3,12 +3,53 @@ Primary file for the API
 */
 
 // Dependencies
+const { log } = require("console");
 const http = require("http");
+const https = require("https");
 const url = require("url");
 const StringDecoder = require("string_decoder").StringDecoder;
+const config = require("./config");
+const fs = require("fs");
 
-// The server should responde to all requests with a string
-const server = http.createServer(function (req, res) {
+// The server should respond to all requests with a string
+// Instantiate the HTTP server
+const httpServer = http.createServer(function (req, res) {
+  unifiedServer(req, res);
+});
+
+// Start the sever, based on the environment defined in the config.js
+httpServer.listen(config.httpPort, function () {
+  console.log(
+    "The server is listening on port " +
+      config.httpPort +
+      " in " +
+      config.envName +
+      " mode"
+  );
+});
+
+// Instantiate the HTTPS server
+const httpsServerOptions = {
+  key: fs.readFileSync("./https/key.pem"),
+  cert: fs.readFileSync("./https/cert.pem"),
+};
+const httpsServer = https.createServer(httpsServerOptions, function (req, res) {
+  unifiedServer(req, res);
+});
+
+// Start the HTTPS server
+httpsServer.listen(config.httpsPort, function () {
+  console.log(
+    "The server is listening on port " +
+      config.httpsPort +
+      " in " +
+      config.envName +
+      " mode"
+  );
+});
+
+// All the server logic for both the http and https server
+var unifiedServer = function (req, res) {
   // Get the url and parse it
   const parsedUrl = url.parse(req.url, true);
 
@@ -61,32 +102,17 @@ const server = http.createServer(function (req, res) {
       payload = typeof payload == "object" ? payload : {};
       // every payload we receive is an object, we need to convert it into a string
       const payloadString = JSON.stringify(payload); // this is the payload  the handler is going to send back to the user
-      // Return the response -- instead of sending res.send("hello world")
+
+      // Return the response -- instead of sending res.send("hello world"
+      res.setHeader("Content-Type", "application/json");
       res.writeHead(statusCode);
       res.end(payloadString);
+
+      // Log
       console.log("Returing this response: " + statusCode, payloadString);
     });
-
-    // Send the response
-    // res.end("hello world!\n");
-    // console.log("Request received with this payload", buffer);
   });
-
-  // Log the request path
-  //   console.log(
-  //     "request received on path: " +
-  //       trimmedPath +
-  //       " with method: " +
-  //       method +
-  //       ", and with these query string parameters "
-  //   );
-  //console.log("Request received with these headers", headers);
-});
-
-// Start the server, and have it listen on port 5000
-server.listen(8000, function () {
-  console.log("The server is listening on port 8000");
-});
+};
 
 // Define the handlers
 const handlers = {};
