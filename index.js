@@ -8,9 +8,10 @@ const http = require("http");
 const https = require("https");
 const url = require("url");
 const StringDecoder = require("string_decoder").StringDecoder;
-const config = require("./config");
+const config = require("./lib/config");
 const fs = require("fs");
 const handlers = require("./lib/handlers");
+const helpers = require("./lib/helpers");
 
 // var _data = require("./lib/data");
 
@@ -69,7 +70,9 @@ var unifiedServer = function (req, res) {
   // Get the query string as an object
   const queryStringObject = parsedUrl.query;
 
-  console.log(parsedUrl.query);
+  console.log(parsedUrl);
+
+  // console.log(parsedUrl.query);
 
   // Get the HTTP Method
   const method = req.method.toLowerCase();
@@ -100,7 +103,8 @@ var unifiedServer = function (req, res) {
       queryStringObject: queryStringObject,
       method: method,
       headers: headers,
-      payload: buffer,
+      // payload: buffer,
+      payload: helpers.parseJsonToObject(buffer),
     };
 
     // Route the request to the handler specified in the router
