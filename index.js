@@ -122,7 +122,7 @@ var unifiedServer = function (req, res) {
       res.end(payloadString);
 
       // Log
-      console.log("Returing this response: " + statusCode, payloadString);
+      console.log("Returning this response: " + statusCode, payloadString);
     });
   });
 };
@@ -131,4 +131,5 @@ var unifiedServer = function (req, res) {
 const router = {
   ping: handlers.ping,
   users: handlers.users,
+  tokens: handlers.tokens,
 };
